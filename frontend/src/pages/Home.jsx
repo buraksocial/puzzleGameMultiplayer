@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
-const socket = io(import.meta.env.VITE_BACKEND_URL || window.location.origin);
+const socket = io(import.meta.env.VITE_BACKEND_URL || window.location.origin, {
+  transports: ['polling']
+});
 
 function Home() {
   const navigate = useNavigate();

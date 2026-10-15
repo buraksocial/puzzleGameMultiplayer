@@ -7,7 +7,9 @@ import MiniGameBoard from '../components/MiniGameBoard';
 import { Mic, MicOff, Video, VideoOff } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-const socket = io(BACKEND_URL);
+const socket = io(BACKEND_URL, {
+  transports: ['polling']
+});
 
 function Room() {
   const { roomId } = useParams();
