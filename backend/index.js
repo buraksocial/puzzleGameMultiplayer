@@ -22,6 +22,7 @@ const io = new Server(server, {
 // Initialize PeerJS Server for WebRTC signaling
 const peerServer = ExpressPeerServer(server, {
   debug: true,
+  proxied: true,
   path: '/'
 });
 app.use('/peerjs', peerServer);

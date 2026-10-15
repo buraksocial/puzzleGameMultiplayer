@@ -35,8 +35,28 @@ function Room() {
   const peerInstance = useRef(null);
   const streamRef = useRef(null);
   const initialized = useRef(false);
+  const roomJoined = useRef(false);
 
   const effectiveGameType = roomData?.gameType || gameType;
+
+  const joinGameRoom = (peerId = null) => {
+    if (roomJoined.current) return;
+    roomJoined.current = true;
+    if (isHost) {
+      socket.emit('create-room', { roomId, roomName: state.roomName || `${playerName}'s Room`, password: state.password || '', pieces, image, gameType, hostName: playerName, peerId }, (res) => {
+        if (!res?.success) { roomJoined.current = false; setError(res?.message || 'Oda oluşturulamadı'); return; }
+        setRoomData({ pieces, image, gameType, game: { status: 'lobby' }, players: [{ id: socket.id, name: playerName, peerId, score: 0 }] });
+      });
+    } else {
+      socket.emit('join-room', { roomId, password: joinPassword, playerName, peerId }, (res) => {
+        if (!res.success) { roomJoined.current = false; setError(res.message); return; }
+        setRoomData(res.room);
+        res.room.players.forEach(p => {
+          if (p.id !== socket.id && p.peerId && peerInstance.current) connectToNewUser(p.peerId, streamRef.current);
+        });
+      });
+    }
+  };
 
   useEffect(() => {
     if (!playerName) {
@@ -47,7 +67,10 @@ function Room() {
     if (initialized.current) return;
     initialized.current = true;
 
-    // Get list of cameras first
+    if (socket.connected) joinGameRoom(null);
+    else socket.once('connect', () => joinGameRoom(null));
+
+    // Camera and PeerJS are optional; the room must not be blocked by media/signaling.
     navigator.mediaDevices.enumerateDevices().then(devices => {
       const videoDevices = devices.filter(d => d.kind === 'videoinput');
       setCameras(videoDevices);
@@ -102,27 +125,11 @@ function Room() {
       peer.on('open', (id) => {
         console.log('My peer ID is: ' + id);
         
-        // Join socket room
-        if (isHost) {
-           socket.emit('create-room', { roomId, roomName: state.roomName || `${playerName}'s Room`, password: state.password || '', pieces, image, gameType, hostName: playerName, peerId: id }, (res) => {
-             setRoomData({ pieces, image, gameType, game: { status: 'lobby' }, players: [{ id: socket.id, name: playerName, peerId: id, score: 0 }] });
-          });
-        } else {
-          socket.emit('join-room', { roomId, password: joinPassword, playerName, peerId: id }, (res) => {
-            if (!res.success) {
-              setError(res.message);
-            } else {
-              setRoomData(res.room);
-              // Call existing players
-              res.room.players.forEach(p => {
-                if (p.id !== socket.id && p.peerId) {
-                  connectToNewUser(p.peerId, streamRef.current);
-                }
-              });
-            }
-          });
-        }
+         if (!roomJoined.current) joinGameRoom(id);
+         else socket.emit('update-peer-id', { roomId, peerId: id });
       });
+
+      peer.on('error', err => console.warn('PeerJS video unavailable:', err.type || err.message));
 
       peer.on('call', (call) => {
         call.answer(streamRef.current);
@@ -145,10 +152,7 @@ function Room() {
       socket.on('room:players', players => setRoomData(prev => prev ? { ...prev, players } : prev));
       socket.on('chat:message', message => setChat(prev => [...prev.slice(-49), message]));
 
-    }).catch(err => {
-      console.error('Failed to get local stream', err);
-      alert('Kamera/Mikrofon izni alınamadı!');
-    });
+    }).catch(err => console.warn('Kamera/mikrofon kullanılamıyor; oda ses/görüntü olmadan devam ediyor.', err));
   };
 
   return () => {
@@ -158,6 +162,7 @@ function Room() {
        socket.off('user-left');
        socket.off('room:players');
        socket.off('chat:message');
+       socket.off('connect');
     };
   }, [roomId]);
 
