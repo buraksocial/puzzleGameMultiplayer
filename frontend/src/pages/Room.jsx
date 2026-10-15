@@ -95,7 +95,8 @@ function Room() {
         const peer = new Peer(undefined, {
          host: new URL(BACKEND_URL).hostname,
          port: Number(new URL(BACKEND_URL).port || (new URL(BACKEND_URL).protocol === 'https:' ? 443 : 80)),
-        path: '/peerjs'
+         secure: new URL(BACKEND_URL).protocol === 'https:',
+         path: '/peerjs'
       });
 
       peer.on('open', (id) => {
