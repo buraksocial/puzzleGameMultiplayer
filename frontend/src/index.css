@@ -1,0 +1,152 @@
+:root {
+  --bg-color: #0b5edd;
+  --bg-pattern: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h40v40H0z" fill="%230b5edd"/><path d="M20 20c-2 0-4-1-4-3s2-3 4-3 4 1 4 3-2 3-4 3z" fill="%231a6bf0"/></svg>');
+  --panel-bg: #ffffff;
+  --text-main: #333333;
+  --text-light: #777777;
+  
+  --primary-blue: #00b0ff;
+  --primary-yellow: #ffc400;
+  --primary-orange: #ff3d00;
+  --primary-green: #00e676;
+  
+  --stroke-color: #000000;
+  --stroke-width: 3px;
+  --radius-main: 16px;
+  --radius-btn: 12px;
+  
+  --shadow-main: 0px 8px 0px rgba(0,0,0,0.2);
+  --shadow-btn: 0px 4px 0px var(--stroke-color);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  background-image: var(--bg-pattern);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Utilities for Gartic Style */
+.panel {
+  background-color: var(--panel-bg);
+  border: var(--stroke-width) solid var(--stroke-color);
+  border-radius: var(--radius-main);
+  box-shadow: var(--shadow-main);
+  padding: 24px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--primary-blue);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border: var(--stroke-width) solid var(--stroke-color);
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-btn);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+  text-decoration: none;
+}
+
+.btn:hover {
+  filter: brightness(1.1);
+}
+
+.btn:active {
+  transform: translateY(4px);
+  box-shadow: 0px 0px 0px var(--stroke-color);
+}
+
+.btn.yellow { background-color: var(--primary-yellow); color: var(--text-main); }
+.btn.orange { background-color: var(--primary-orange); }
+.btn.green { background-color: var(--primary-green); }
+
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  background-color: #f4f4f4;
+  border: var(--stroke-width) solid var(--stroke-color);
+  border-radius: var(--radius-btn);
+  outline: none;
+  transition: background-color 0.2s;
+}
+
+.input-field:focus {
+  background-color: #ffffff;
+}
+
+h1, h2, h3 {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Responsive Room Layout */
+.room-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  padding: 20px;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.puzzle-panel {
+  flex: 3;
+}
+
+.sidebar-panel {
+  flex: 1;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  .room-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .sidebar-panel {
+    flex: none;
+    height: auto;
+    min-height: 250px;
+    order: 1;
+  }
+
+  .puzzle-panel {
+    flex: none;
+    height: auto;
+    order: 2;
+  }
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
