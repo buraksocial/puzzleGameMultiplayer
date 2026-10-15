@@ -4,12 +4,7 @@ const image = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="400" h
 const roomName = () => `${test.info().title} [${test.info().repeatEachIndex}]`;
 
 async function closePlayers(contexts) {
-  for (const context of contexts) {
-    for (const page of context.pages()) {
-      if (!page.isClosed() && page.url().includes('/room/')) await page.goBack();
-    }
-    await context.close();
-  }
+  await Promise.all(contexts.map(context => context.close({ reason: 'test finished' })));
 }
 
 async function createRoom(page) {
@@ -131,6 +126,7 @@ test('pending permissions and unavailable signaling do not block guest chat or p
     await guest.getByPlaceholder('Mesaj yaz...').press('Enter');
     await expect(host.getByTestId('chat-messages')).toContainText('Medya beklenirken mesaj');
     const id = await placePiece(guest);
+    await expect(guest.locator('canvas')).toBeVisible();
     await expect.poll(async () => (await board(host)).find(p => p.id === id).isLocked).toBe(true);
     await expect.poll(async () => {
       const rendered = await Promise.all([host, guest].map(page => page.locator('canvas').evaluate(canvas => canvas.toDataURL())));
