@@ -25,7 +25,7 @@ function Room() {
   const [error, setError] = useState('');
   
   const [audioEnabled, setAudioEnabled] = useState(false);
-  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(true);
   
   const [cameras, setCameras] = useState([]);
   const [selectedCamera, setSelectedCamera] = useState('');
@@ -93,7 +93,8 @@ function Room() {
       navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
         // Default to disabled
         mediaStream.getAudioTracks().forEach(track => track.enabled = false);
-        mediaStream.getVideoTracks().forEach(track => track.enabled = false);
+        // Show the camera preview by default; microphone remains muted until enabled.
+        mediaStream.getVideoTracks().forEach(track => track.enabled = true);
         
         setStream(mediaStream);
         streamRef.current = mediaStream;
